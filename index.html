@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>92 Logics prototype · KIRAHub RAISE SME assistant</title>
+  <meta name="description" content="Scripted prototype by 92 Logics of a small-business assistant for the KIRAHub RAISE project, Lots I and II. Not a bid and not an official system. No live AI.">
+  <style>
+    :root {
+      --ink: #161b22;
+      --muted: #5b6570;
+      --paper: #eef2f6;
+      --card: #ffffff;
+      --line: #d5dde6;
+      --navy: #0b2a4a;
+      --navy-2: #143f6b;
+      --accent: #0f6e56;
+      --sample: #6b4f1d;
+      --sample-bg: #f7f0e2;
+      --alert: #7a2e2e;
+      --alert-bg: #f8ecec;
+      --shadow: 0 10px 28px rgba(11, 42, 74, 0.07);
+      --serif: Georgia, "Iowan Old Style", Palatino, "Palatino Linotype", serif;
+      --sans: "Segoe UI", system-ui, sans-serif;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      color: var(--ink);
+      background:
+        radial-gradient(1000px 380px at 8% -8%, #d9e6f5 0%, transparent 55%),
+        var(--paper);
+      font-family: var(--sans);
+      font-size: 16px;
+      line-height: 1.5;
+    }
+    .skip { position: absolute; left: -999px; top: 0; background: #fff; padding: 0.5rem 1rem; }
+    .skip:focus { left: 0.5rem; top: 0.5rem; z-index: 5; }
+    .sr {
+      position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+      overflow: hidden; clip: rect(0, 0, 0, 0); border: 0;
+    }
+    .banner {
+      background: var(--navy); color: #f3f7fb; padding: 0.65rem 1.25rem;
+      text-align: center; font-size: 0.95rem;
+    }
+    .top {
+      max-width: 1100px; margin: 0 auto; padding: 1.5rem 1.25rem 0.5rem;
+      display: grid; grid-template-columns: auto 1fr; gap: 1.25rem 1.75rem; align-items: end;
+    }
+    .brand { display: flex; gap: 0.85rem; align-items: center; }
+    .mark {
+      width: 3rem; height: 3rem; display: grid; place-items: center;
+      background: var(--navy); color: #f3f7fb; font-family: var(--serif);
+      font-weight: 700; letter-spacing: -0.04em;
+    }
+    .eyebrow { margin: 0; color: var(--accent); font-size: 0.78rem; letter-spacing: 0.04em; text-transform: uppercase; }
+    .top h1 { margin: 0.15rem 0 0; font-family: var(--serif); font-size: 1.7rem; font-weight: 650; letter-spacing: -0.02em; }
+    .lede { margin: 0; color: var(--muted); max-width: 42rem; font-size: 0.98rem; }
+    .shell {
+      max-width: 1100px; margin: 1rem auto 2rem; padding: 0 1.25rem;
+      display: grid; grid-template-columns: 260px minmax(0, 1fr); gap: 1rem; align-items: start;
+    }
+    .rail, main { background: var(--card); border: 1px solid var(--line); border-radius: 14px; box-shadow: var(--shadow); }
+    .rail { padding: 1rem; }
+    .rail-label { margin: 0 0 0.5rem; font-size: 0.78rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.04em; }
+    .chips { display: flex; flex-direction: column; gap: 0.4rem; }
+    .chips button {
+      text-align: left; border: 1px solid var(--line); background: #f7fafc; color: var(--ink);
+      border-radius: 10px; padding: 0.55rem 0.7rem; font: inherit; font-size: 0.88rem; cursor: pointer;
+    }
+    .chips button:hover, .chips button:focus-visible { border-color: var(--navy-2); outline: none; }
+    .list { margin: 0.35rem 0 0; padding-left: 1.1rem; color: var(--ink); font-size: 0.86rem; }
+    .list li { margin: 0.35rem 0; }
+    .fine { margin: 0.85rem 0 0; color: var(--muted); font-size: 0.82rem; }
+    main { padding: 0; overflow: hidden; min-height: 540px; display: flex; flex-direction: column; }
+    .stage-bar {
+      display: flex; justify-content: space-between; gap: 1rem; align-items: start;
+      padding: 0.9rem 1rem; border-bottom: 1px solid var(--line); background: #f8fbfd;
+    }
+    .kicker { margin: 0; font-size: 0.75rem; letter-spacing: 0.05em; text-transform: uppercase; color: var(--accent); }
+    .name { margin: 0.15rem 0 0; font-weight: 650; font-size: 0.98rem; }
+    .status { margin: 0; color: var(--muted); font-size: 0.8rem; white-space: nowrap; }
+    .thread {
+      flex: 1; padding: 1rem; display: flex; flex-direction: column; gap: 0.75rem;
+      min-height: 320px; max-height: 460px; overflow: auto;
+    }
+    .bubble { max-width: 92%; padding: 0.75rem 0.9rem; border-radius: 12px; border: 1px solid var(--line); background: #f7fafc; }
+    .bubble.user { align-self: flex-end; background: var(--navy); color: #f3f7fb; border-color: var(--navy); }
+    .bubble.agent { align-self: flex-start; }
+    .bubble .who { margin: 0 0 0.35rem; font-size: 0.72rem; letter-spacing: 0.04em; text-transform: uppercase; opacity: 0.75; }
+    .bubble p { margin: 0.4rem 0; }
+    .bubble ul, .bubble ol { margin: 0.4rem 0; padding-left: 1.15rem; }
+    .tag {
+      display: inline-block; margin: 0.15rem 0.25rem 0 0; padding: 0.15rem 0.45rem; border-radius: 999px;
+      background: #e8eef5; color: var(--navy-2); font-size: 0.72rem;
+    }
+    .sample-note { margin: 0 0 0.5rem; padding: 0.4rem 0.55rem; border-radius: 8px; background: var(--sample-bg); color: var(--sample); font-size: 0.82rem; }
+    .refuse { margin: 0 0 0.5rem; padding: 0.4rem 0.55rem; border-radius: 8px; background: var(--alert-bg); color: var(--alert); font-size: 0.82rem; }
+    .composer { display: grid; grid-template-columns: 1fr auto; gap: 0.55rem; padding: 0.85rem 1rem 0.35rem; border-top: 1px solid var(--line); }
+    .composer textarea {
+      width: 100%; resize: vertical; min-height: 2.6rem; border: 1px solid var(--line);
+      border-radius: 10px; padding: 0.55rem 0.7rem; font: inherit;
+    }
+    .composer button {
+      border: 0; border-radius: 10px; background: var(--accent); color: #fff; padding: 0.55rem 0.9rem;
+      font: inherit; font-weight: 600; cursor: pointer; white-space: nowrap;
+    }
+    .composer button:hover, .composer button:focus-visible { background: #0c5c48; outline: none; }
+    .composer-note { padding: 0 1rem 0.9rem; margin: 0; }
+    .facts { margin-top: 1rem; color: var(--muted); font-size: 0.88rem; }
+    .facts strong { color: var(--ink); font-weight: 650; }
+    footer { max-width: 1100px; margin: 0 auto 2rem; padding: 0 1.25rem; color: var(--muted); font-size: 0.88rem; text-align: center; }
+    footer p { margin: 0; }
+    @media (max-width: 800px) {
+      .top, .shell { grid-template-columns: 1fr; }
+      .composer { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <a class="skip" href="#main">Skip to the assistant</a>
+  <div class="banner" role="note">
+    <strong>92 Logics prototype.</strong>
+    Not an official KIRAHub system, not a bid, and not a live AI service. Scripted replies only.
+  </div>
+  <header class="top">
+    <div class="brand">
+      <span class="mark" aria-hidden="true">92</span>
+      <div>
+        <p class="eyebrow">92 Logics · scripted demo</p>
+        <h1>KIRAHub RAISE SME assistant</h1>
+      </div>
+    </div>
+    <p class="lede">A labeled sample for KIRAHub RAISE AI development, Lots I and II (Finland). A visitor picks a small-business task and gets a scripted answer. It is for Central Baltic SME pilots in spirit only. This page does not implement a KIRAHub system.</p>
+  </header>
+  <div class="shell">
+    <aside class="rail" aria-label="Sample prompts">
+      <p class="rail-label">Try a scripted task</p>
+      <div class="chips">
+        <button type="button" data-prompt="summarize a renovation project note">Summarize a renovation project note</button>
+        <button type="button" data-prompt="draft a follow-up to a partner">Draft a follow-up to a partner</button>
+        <button type="button" data-prompt="turn a site checklist into steps">Turn a site checklist into steps</button>
+      </div>
+      <p class="rail-label" style="margin-top:1rem">What the sample can do</p>
+      <ul class="list">
+        <li><strong>Summarize.</strong> A short plain recap of a generic project note.</li>
+        <li><strong>Follow-up.</strong> A draft a person reviews. Nothing is sent.</li>
+        <li><strong>Checklist.</strong> A short list turned into ordered steps.</li>
+      </ul>
+      <p class="fine">Do not paste a personal name, email, phone number, or company registry number. This page refuses to store them and does not keep what you type.</p>
+      <p class="facts">Questions close <strong>8 October 2026 at 16:00</strong>. The offer closes <strong>18 October 2026 at 00:00 EEST</strong>. No budgets or pilot counts are shown here.</p>
+    </aside>
+    <main id="main">
+      <section aria-label="Scripted SME assistant">
+        <div class="stage-bar">
+          <div>
+            <p class="kicker">SME assistant</p>
+            <p class="name">Summarize · draft a follow-up · checklist into steps</p>
+          </div>
+          <p class="status">Offline · scripted</p>
+        </div>
+        <div class="thread" id="thread" aria-live="polite"></div>
+        <form id="composer" class="composer">
+          <label class="sr" for="ask">Choose a small-business task</label>
+          <textarea id="ask" rows="2" placeholder="Pick a task, or paste a generic note. Do not include a personal name, email, phone, or company registry number."></textarea>
+          <button type="submit">Show sample</button>
+        </form>
+        <p class="fine composer-note">Runs in this browser only. No account, no API key, no live AI service, and nothing is stored.</p>
+      </section>
+    </main>
+  </div>
+  <footer>
+    <p>Prototype by 92 Logics · cowork@92logics.com · not an official KIRAHub system</p>
+  </footer>
+  <noscript><p class="banner">This prototype needs JavaScript in the browser. It still does not call any server or store personal data.</p></noscript>
+  <script>
+    (function () {
+      "use strict";
+      var thread = document.getElementById("thread");
+      var form = document.getElementById("composer");
+      var ask = document.getElementById("ask");
+
+      function esc(s) {
+        return String(s)
+          .replace(/&/g, "&amp;")
+          .replace(/</g, "&lt;")
+          .replace(/>/g, "&gt;")
+          .replace(/"/g, "&quot;");
+      }
+
+      function addBubble(kind, who, html) {
+        var el = document.createElement("div");
+        el.className = "bubble " + kind;
+        el.innerHTML = '<p class="who">' + esc(who) + "</p>" + html;
+        thread.appendChild(el);
+        thread.scrollTop = thread.scrollHeight;
+      }
+
+      function looksSensitive(text) {
+        var email = /[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}/i;
+        var phoneWord = /\b(?:phone|mobile|tel\.?|telephone|puhelin|gsm)\b/i;
+        var intlPhone = /\+\d[\d\s().-]{6,}\d/;
+        var localPhone = /\b0\d{2,3}[\s-]?\d{3,}[\s-]?\d{2,}\b/;
+        var longDigits = /(?:\d[\s().-]?){8,}\d/;
+        var registryWord = /\b(?:y-tunnus|ytunnus|y\s*tunnus|business\s*id|company\s*(?:registry|reg\.?|id|number|no\.?)|registry\s*(?:number|no\.?|code)|kaupparekisteri|organisaatio(?:numero)?)\b/i;
+        var yTunnus = /\b\d{7}-\d\b/;
+        var vat = /\bFI\d{8}\b/i;
+        var named = /\b(?:my name is|name is|i am|i'm|named|contact person|for (?:mr|mrs|ms|dr)\b|(?:mr|mrs|ms|dr)\.?\s+[a-z])/i;
+        var properName = /\b[A-ZÅÄÖ][a-zåäö']+(?:\s+[A-ZÅÄÖ][a-zåäö']+){1,2}\b/;
+        return email.test(text) || phoneWord.test(text) || intlPhone.test(text) || localPhone.test(text) || longDigits.test(text) || registryWord.test(text) || yTunnus.test(text) || vat.test(text) || named.test(text) || properName.test(text);
+      }
+
+      function tag() {
+        return '<p><span class="tag">Scripted sample · RAISE Lots I and II · not a bid</span></p>';
+      }
+
+      function dates() {
+        return "<p>Questions close 8 October 2026 at 16:00. The offer closes 18 October 2026 at 00:00 EEST.</p>";
+      }
+
+      function answer(text) {
+        var q = text.toLowerCase();
+        if (looksSensitive(text)) {
+          return (
+            '<p class="refuse">This page will not store a personal name, email, phone number, or company registry number.</p>' +
+            "<p>That text was not kept. Ask again with a generic task only: summarize a project note, draft a follow-up, or turn a checklist into steps.</p>"
+          );
+        }
+        if (/\b(budget|budgets|cost|costs|price|prices|euro|euros|eur\b|funding|how many|pilot count|pilots?|headcount|allocation|statistics)\b/.test(q)) {
+          return (
+            '<p class="refuse">This prototype does not invent KIRAHub budgets or pilot counts.</p>' +
+            "<p>It only shows scripted samples of three small-business tasks. It is not a bid and not an official system.</p>" +
+            dates()
+          );
+        }
+        if (/\b(deadline|question|questions|offer|tender|close|closing|october|lot)\b/.test(q)) {
+          return (
+            "<p>This page is a scripted sample for the KIRAHub RAISE project, Lots I and II (Finland). It is not a bid and not an official KIRAHub system.</p>" +
+            dates() +
+            "<p>It is for Central Baltic SME pilots in spirit only. It does not state budgets or pilot counts.</p>" +
+            tag()
+          );
+        }
+        if (/\b(summar|renovation|project note|recap)\b/.test(q)) {
+          return (
+            '<p class="sample-note">Labeled sample. The note below is generic. Your text was not stored or parsed.</p>' +
+            "<p><strong>Summary a person would review:</strong> A small customer area needs a light renovation. Walls need paint, the worn floor needs replacing, and two ceiling lights need swapping. The site visit is done. Materials are not ordered. Work can happen only before opening. Next, confirm the access window and put the work in order.</p>" +
+            "<p>This is not a quote and not a project record. A person decides what to keep.</p>" +
+            tag()
+          );
+        }
+        if (/\b(draft|follow-?up|partner|email|message)\b/.test(q)) {
+          return (
+            '<p class="sample-note">Labeled draft. Not addressed to a named person, and not sent.</p>' +
+            "<p>Hello,</p>" +
+            "<p>Thank you for the site visit. We noted three items: paint, flooring in the customer area, and two ceiling lights. We will turn the site checklist into ordered steps and send that note for review. This note is not an offer.</p>" +
+            "<p>A person would edit this draft before anything left the building. This prototype does not send mail and does not store a partner name.</p>" +
+            tag()
+          );
+        }
+        if (/\b(checklist|steps|site|task list|to-?do)\b/.test(q)) {
+          return (
+            '<p class="sample-note">Labeled sample. A generic checklist, not one you pasted.</p>' +
+            "<p>Turn the site list into steps a person can follow:</p>" +
+            "<ol>" +
+            "<li>Confirm who may enter, and that the visit is before opening.</li>" +
+            "<li>Photograph the customer area and the two ceiling lights.</li>" +
+            "<li>Measure the floor that needs replacing.</li>" +
+            "<li>Note anything in the way, such as stored stock.</li>" +
+            "<li>Write the work in that order and ask a partner to review it.</li>" +
+            "<li>Stop. A person decides the next action. This page does not keep the list.</li>" +
+            "</ol>" +
+            tag()
+          );
+        }
+        return (
+          '<p class="sample-note">No matching script for that wording.</p>' +
+          "<p>Try one of the sample tasks: summarize a renovation project note, draft a follow-up to a partner, or turn a site checklist into steps. Answers are scripted. This is not a bid and not an official KIRAHub system.</p>" +
+          dates()
+        );
+      }
+
+      function submitText(text) {
+        var clean = text.replace(/\s+/g, " ").trim();
+        if (!clean) return;
+        var shown = looksSensitive(clean) ? "Personal or registry details omitted — not stored." : clean;
+        addBubble("user", "You", "<p>" + esc(shown) + "</p>");
+        addBubble("agent", "SME assistant", answer(clean));
+        ask.value = "";
+      }
+
+      addBubble(
+        "agent",
+        "SME assistant",
+        "<p>Pick a small-business task. I only give scripted answers: a summary of a renovation project note, a follow-up draft for a partner, or a site checklist turned into steps.</p>" +
+        "<p>This sample is for the KIRAHub RAISE project, Lots I and II (Finland), and for Central Baltic SME pilots in spirit only. It is not a bid and not an official system. Questions close 8 October 2026 at 16:00. The offer closes 18 October 2026 at 00:00 EEST.</p>"
+      );
+
+      document.querySelectorAll("[data-prompt]").forEach(function (btn) {
+        btn.addEventListener("click", function () {
+          submitText(btn.getAttribute("data-prompt"));
+        });
+      });
+
+      form.addEventListener("submit", function (event) {
+        event.preventDefault();
+        submitText(ask.value);
+      });
+    }());
+  </script>
+</body>
+</html>
